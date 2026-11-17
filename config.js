@@ -4,5 +4,5 @@ window.AQ_CONFIG = {
   anonKey: "YOUR-ANON-PUBLIC-KEY",
   ownerEmail: "nooralqatami@gmail.com",
   bucket: "assets",
-  siteUrl: "https://YOUR-DOMAIN.com"
+  siteUrl: "https://alqatami-website.pages.dev"
 };

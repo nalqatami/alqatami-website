@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://alqatami-website.pages.dev/sitemap.xml
