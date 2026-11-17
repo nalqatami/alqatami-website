@@ -1368,7 +1368,7 @@ function renderHistory(){setTimeout(()=>{if(window.__hj){const e=document.getEle
  const SA=!window.claude&&C&&C.supabaseUrl&&C.anonKey;
  window.__blob=id=>SA?C.supabaseUrl.replace(/\/$/,'')+'/storage/v1/object/public/'+(C.bucket||'assets')+'/'+id:'/_blob/'+id;
  if(!SA)return;
- const U=C.supabaseUrl.replace(/\/$/,''),K=C.anonKey,OWN=(C.ownerEmails||[C.ownerEmail]).filter(Boolean).map(e=>e.toLowerCase()),B=C.bucket||'assets';
+ const U=C.supabaseUrl.replace(/\/$/,''),K=C.anonKey,OWN=[C.ownerHash].filter(Boolean),__h=async e=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(e)))].map(b=>b.toString(16).padStart(2,'0')).join(''),B=C.bucket||'assets';
  const LS='aq-session';let S=null;try{S=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
  const save=()=>{try{S?localStorage.setItem(LS,JSON.stringify(S)):localStorage.removeItem(LS)}catch(e){}try{document.cookie='aq_at='+(S?S.at:'')+'; path=/; Secure; SameSite=Lax; max-age='+(S?86400:0)}catch(e){}};
  // magic link return: #access_token=...&refresh_token=...
@@ -1386,8 +1386,8 @@ function renderHistory(){setTimeout(()=>{if(window.__hj){const e=document.getEle
   update:async v=>{const s=await doc(path).get();await doc(path).set(Object.assign({},s.exists?s.data():{},v))},
   delete:async()=>{await rest('docs?coll=eq.'+enc(c)+'&id=eq.'+enc(id),{method:'DELETE'})}}};
  const db={doc,collection:c=>({doc:id=>doc(c+'/'+id),get:async()=>{const rows=await rest('docs?coll=eq.'+enc(c)+'&select=id,data&limit=5000')||[];return{docs:rows.map(r=>({id:r.id,exists:true,data:()=>r.data}))}}})};
- const user={id:async()=>{const m=await me();return m&&m.id},isOwner:async()=>{const m=await me();return!!(m&&OWN.includes(m.email))},canEdit:async()=>user.isOwner(),
-  can:async n=>{const m=await me();if(!m)return false;return n==='data.write'?true:OWN.includes(m.email)},me:async()=>{const m=await me();return m?{id:m.id,name:m.email}:{id:null,name:''}},
+ const user={id:async()=>{const m=await me();return m&&m.id},isOwner:async()=>{const m=await me();return!!(m&&OWN.includes(await __h(m.email)))},canEdit:async()=>user.isOwner(),
+  can:async n=>{const m=await me();if(!m)return false;return n==='data.write'?true:OWN.includes(await __h(m.email))},me:async()=>{const m=await me();return m?{id:m.id,name:m.email}:{id:null,name:''}},
   profiles:async ids=>{const o={};try{const rows=await rest('docs?coll=eq.profiles&select=id,data&id=in.('+ids.map(x=>'"'+x+'"').join(',')+')')||[];rows.forEach(r=>o[r.id]=r.data||{})}catch(e){}return o}};
  const rid=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
  const assets={upload:async blob=>{const id=rid(),ct=blob.type||'application/octet-stream';const r=await fetch(U+'/storage/v1/object/'+B+'/'+id,{method:'POST',headers:await hdr({'Content-Type':ct,'x-upsert':'false'}),body:blob});if(!r.ok)throw Object.assign(new Error('upload '+r.status),{code:'error'});return{id,url:window.__blob(id),sizeBytes:blob.size,contentType:ct}},
