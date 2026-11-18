@@ -1,0 +1,16 @@
+/scans/*
+  Cache-Control: public, max-age=604800
+/photos/*
+  Cache-Control: public, max-age=604800
+/covers/*
+  Cache-Control: public, max-age=604800
+/img/*
+  Cache-Control: public, max-age=2592000
+/people/img/*
+  Cache-Control: public, max-age=604800
+/private/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
