@@ -380,6 +380,14 @@ article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsu
 .totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
 .totop[hidden]{display:none}
 .tmore{display:none}
+.prose.folded>p.hmore{display:none}.hmorebtn{margin:4px 0 14px}
+.sbtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:none;color:inherit;cursor:pointer;margin-inline-end:8px;flex:none}
+.srch{position:fixed;inset:0;z-index:2000;background:rgba(10,16,24,.55);display:flex;justify-content:center;align-items:flex-start;padding:max(16px,6vh) 16px 16px}
+.srch-in{width:min(720px,100%);max-height:86vh;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+.srch-top{display:flex;gap:8px;padding:14px;border-bottom:1px solid var(--line)}.srch-top input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:1rem;background:var(--bg);color:var(--ink)}
+.srch-res{overflow:auto;padding:6px 14px 16px}.srch-res h3{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}.srch-res ul{list-style:none;margin:0;padding:0}
+.srch-res li button{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:start;padding:9px 10px;border:0;border-radius:8px;background:none;color:inherit;font:inherit;cursor:pointer}.srch-res li button:hover,.srch-res li button:focus-visible{background:var(--sunk)}.srch-res li small{color:var(--muted);white-space:nowrap}
+body.srch-open{overflow:hidden}footer.site .mlink{display:block;text-align:center;padding:0 16px 18px;color:inherit;opacity:.85}
 .dtabnote{max-width:820px;margin:6px 0 4px;font-size:.85rem}
 .tpanel{margin-inline-start:auto}@media(max-width:860px){.tpanel{display:none}}@media(min-width:861px){body.profhide .prof{display:none!important}}
 @media(min-width:821px){article.doc:not(.dcol){grid-template-rows:auto auto 1fr}article.doc:not(.dcol)>div:not([class]){grid-column:1;grid-row:2/span 2}article.doc:not(.dcol)>.hltog{grid-column:2;grid-row:2;justify-self:start}article.doc:not(.dcol)>.scans,article.doc:not(.dcol)>button.scan{grid-column:2;grid-row:3}}
@@ -1388,12 +1396,12 @@ function applyLang(){setNames();document.documentElement.lang=lang;document.docu
 function render(){const h=(location.hash||'#home').slice(1);let r=h,pid=null;
   if(h.startsWith('person-')){r='tree';pid=h.slice(7);if(!P[pid])pid=null}
   if(h.startsWith('press-')||h==='press'){r='press';window.__prs=Object.assign(window.__prs||{p:'',o:'old',q:''},{t:({articles:'ar',interviews:'iv',videos:'vid',writing:'by'})[h.slice(6)]||'all'})}
-  if(h==='mosque'){r='mosque'}if(h==='documents')window.__dcat='all';if(/^documents-(original|british|books)$/.test(h)){window.__dcat={original:'orig',british:'british',books:'books'}[h.slice(10)];r='documents'}
-  if(!['home','tree','charts','people','history','documents','mosque','books','press','businesses','dewaniya'].includes(r))r='home';
+  if(h==='mosque'){r='mosque'}if(h==='method'){r='method'}if(h==='documents')window.__dcat='all';if(/^documents-(original|british|books)$/.test(h)){window.__dcat={original:'orig',british:'british',books:'books'}[h.slice(10)];r='documents'}
+  if(!['home','tree','charts','people','history','documents','mosque','method','books','press','businesses','dewaniya'].includes(r))r='home';
   route=r;document.body.classList.toggle('home',r==='home');document.body.classList.toggle('treeapp',r==='tree');
   document.querySelectorAll('nav.main a').forEach(a=>{if(a.dataset.r===r||(r==='mosque'&&a.dataset.r==='documents'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   if(r!=='tree')Tree.destroy();
-  ({home:renderHome,tree:()=>Tree.mount(pid),people:renderPeople,history:renderHistory,charts:renderCharts,documents:renderDocs,mosque:renderMosque,books:renderBooks,businesses:renderBiz,press:renderPress,dewaniya:renderDew})[r]();
+  ({home:renderHome,tree:()=>Tree.mount(pid),people:renderPeople,history:renderHistory,charts:renderCharts,documents:renderDocs,mosque:renderMosque,method:renderMethod,books:renderBooks,businesses:renderBiz,press:renderPress,dewaniya:renderDew})[r]();
   if(r!=='tree')window.scrollTo(0,0);
 }
 
@@ -1951,6 +1959,12 @@ window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
  try{if(localStorage.getItem('aq-profhide')==='1')document.body.classList.add('profhide')}catch(e){}
  tb.appendChild(b);lab()};
  new MutationObserver(()=>{if(document.querySelector('.tbar')&&!document.querySelector('.tpanel'))ensure()}).observe(document.documentElement,{childList:true,subtree:true})})();
+/* Family History: each section shows its opening paragraphs, with the rest behind "Read more". */
+(()=>{const fold=()=>{const ar=document.documentElement.lang==='ar';document.querySelectorAll('.hs .prose:not([data-fold])').forEach(pr=>{pr.dataset.fold='1';const ps=[...pr.querySelectorAll(':scope>p')];if(ps.length<=2)return;
+  ps.slice(2).forEach(p=>p.classList.add('hmore'));pr.classList.add('folded');const b=document.createElement('button');b.type='button';b.className='btn hmorebtn';
+  const lab=()=>{b.textContent=pr.classList.contains('folded')?(ar?`اقرأ المزيد (${num(ps.length-2)} فقرات)`:`Read more (${ps.length-2} more paragraphs)`):(ar?'اختصر':'Show less')};lab();
+  b.onclick=()=>{pr.classList.toggle('folded');lab();if(pr.classList.contains('folded')){const r=pr.getBoundingClientRect();if(r.top<0)pr.scrollIntoView({block:'start'})}};pr.after(b)})};
+ new MutationObserver(()=>{if(document.querySelector('.hs .prose:not([data-fold])'))fold()}).observe(document.documentElement,{childList:true,subtree:true})})();
 
 function docHTML(d){const L=lang;const g=(o)=>o[L]||'';
  const what=d.id==='alzayed47'?t('doc1_what'):g(d.what),why=d.id==='alzayed47'?t('doc1_why'):g(d.why),status=d.id==='alzayed47'?t('doc1_status'):g(d.status);
@@ -1993,6 +2007,94 @@ function renderMosque(){const L=lang==='ar';const T=(en,ar)=>L?ar:en;const list=
  main.querySelectorAll('[data-src]').forEach(b=>b.addEventListener('click',()=>openViewer(b.dataset.src)));
  main.querySelectorAll('[data-mqgo]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const id=a.dataset.mqgo;const inBook=typeof BOOK_PAGES!=='undefined'&&BOOK_PAGES.some(b=>'doc-'+b.id===id);window.__dj=id;location.hash=inBook?'books':'documents';
   if(inBook)setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({block:'start'})},300)}))}
+
+/* One search for the whole site: people, documents, history, press, books and businesses.
+   A Search button sits in the header; results open the right page at the right place. */
+(()=>{
+ const norm=x=>String(x||'').toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[«»"'’‘()،,.:;]/g,' ');
+ const o=v=>v?(typeof v==='string'?v:(v.en||'')+' '+(v.ar||'')):'';
+ let IDX=null;
+ const build=()=>{const L=[];
+  for(const id in P){const p=P[id];if(!p||!p.n)continue;L.push({k:'p',id,tx:norm(p.n+' '+(AR_N[id]||'')+' '+(p.en||''))})}
+  (DOCS||[]).forEach(d=>L.push({k:'d',id:d.id,tx:norm([o(d.t),o(d.what),o(d.kind),o(d.date),o(d.src),(d.people||[]).map(x=>P[x]?P[x].n+' '+(AR_N[x]||''):'').join(' '),(d.scans||[]).map(s=>(s.cap||'')+' '+(s.cap_ar||'')).join(' ')].join(' '))}));
+  if(typeof BOOK_PAGES!=='undefined')BOOK_PAGES.forEach(d=>L.push({k:'bp',id:d.id,tx:norm([o(d.t),o(d.what),o(d.kind),o(d.date)].join(' '))}));
+  if(typeof HIST!=='undefined')HIST.forEach(h=>L.push({k:'h',id:h.id,tx:norm([o(h.t),o(h.when),(h.p||[]).map(o).join(' ')].join(' '))}));
+  for(const pid in NEWS)(NEWS[pid]||[]).forEach((n,i)=>{if(n.nopress)return;L.push({k:'n',id:pid+'|'+i,pid,n,tx:norm([o(n.t),o(n.src),o(n.date),P[pid]?P[pid].n+' '+(AR_N[pid]||''):''].join(' '))})});
+  if(typeof BOOKS!=='undefined')BOOKS.forEach(b=>{let en='';try{en=t(b.k+'_t')}catch(e){}L.push({k:'b',id:b.k,b,tx:norm([b.ar,en,b.year,(b.authors||[]).map(x=>P[x]?P[x].n+' '+(AR_N[x]||''):'').join(' ')].join(' '))})});
+  if(typeof BIZ!=='undefined')BIZ.forEach(z=>L.push({k:'z',id:z.k,z,tx:norm([o(z.name),o(z.d)].join(' '))}));
+  return L};
+ const go=(hash,pre)=>{close();if(pre)pre();if(location.hash==='#'+hash)render();else location.hash=hash};
+ let box=null;
+ const close=()=>{if(box){box.remove();box=null;document.body.classList.remove('srch-open')}};
+ const open=()=>{if(box)return;const ar=lang==='ar';IDX=IDX||build();
+  box=document.createElement('div');box.className='srch';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label',ar?'البحث في الموقع':'Search the site');
+  box.innerHTML=`<div class="srch-in"><div class="srch-top"><input type="search" placeholder="${ar?'ابحث عن اسم أو مكان أو سنة أو موضوع':'Search for a name, place, year or subject'}" aria-label="${ar?'البحث في الموقع':'Search the site'}"><button type="button" class="btn srch-x">${ar?'إغلاق':'Close'}</button></div><div class="srch-res" aria-live="polite"></div></div>`;
+  document.body.appendChild(box);document.body.classList.add('srch-open');const inp=box.querySelector('input'),res=box.querySelector('.srch-res');
+  box.querySelector('.srch-x').onclick=close;box.addEventListener('click',e=>{if(e.target===box)close()});
+  box.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  const g=v=>v?(v[lang]||v.en||''):'';
+  const label={p:ar?'الأفراد':'People',d:ar?'الوثائق':'Documents',bp:ar?'صفحات الكتب':'Book pages',h:ar?'تاريخ العائلة':'Family History',n:ar?'الصحافة':'Press',b:ar?'الكتب':'Books',z:ar?'الأعمال':'Businesses'};
+  const line=it=>{if(it.k==='p'){const p=P[it.id];const y=typeof years==='function'?years(it.id):'';return [esc(ar&&AR_N[it.id]?AR_N[it.id]:p.n),y?esc(y):'']}
+   if(it.k==='d'){const d=DOCS.find(x=>x.id===it.id);return [esc(g(d.t)),esc(g(d.date))]}
+   if(it.k==='bp'){const d=BOOK_PAGES.find(x=>x.id===it.id);return [esc(g(d.t)),esc(g(d.date))]}
+   if(it.k==='h'){const h=HIST.find(x=>x.id===it.id);return [esc(g(h.t)),esc(g(h.when))]}
+   if(it.k==='n'){return [esc(g(it.n.t)),esc(g(it.n.date))]}
+   if(it.k==='b'){let en='';try{en=t(it.b.k+'_t')}catch(e){}return [esc(ar?it.b.ar:(en&&en!==it.b.k+'_t'?en:it.b.ar)),esc(String(it.b.year||''))]}
+   if(it.k==='z')return [esc(g(it.z.name)),''];return ['','']};
+  const act=it=>{if(it.k==='p')return go('person-'+it.id);if(it.k==='d')return go('documents',()=>{window.__dj='doc-'+it.id;window.__dcat='all'});
+   if(it.k==='bp')return go('books',()=>{setTimeout(()=>{const e=document.getElementById('doc-'+it.id);if(e)e.scrollIntoView({block:'start'})},300)});
+   if(it.k==='h')return go('history',()=>{window.__hj='h-'+it.id});if(it.k==='n')return go('press',()=>{window.__prs={t:'all',p:it.pid,o:'old',q:''}});
+   if(it.k==='b')return go('books');if(it.k==='z')return go('businesses')};
+  let tm;const run=()=>{const words=norm(inp.value).split(/\s+/).filter(w=>w.length>1||/\d/.test(w));if(!words.length){res.innerHTML=`<p class="note">${ar?'اكتب كلمة واحدة على الأقل.':'Type at least one word.'}</p>`;return}
+   const hits=IDX.filter(it=>words.every(w=>it.tx.includes(w)));const sc=it=>it.k!=='p'?0:((/^q/.test(P[it.id].c||'')?0:2)+(it.tx.startsWith(words[0])?0:1));hits.sort((a,b)=>a.k===b.k&&a.k==='p'?sc(a)-sc(b):0);const groups={};hits.forEach(h=>{(groups[h.k]=groups[h.k]||[]).push(h)});
+   const order=['p','d','h','bp','n','b','z'];const max={p:12,d:10,h:6,bp:6,n:8,b:6,z:4};
+   if(!hits.length){res.innerHTML=`<p class="note">${ar?'لا توجد نتائج.':'Nothing found.'}</p>`;return}
+   res.innerHTML=order.filter(k=>groups[k]).map(k=>`<section><h3>${label[k]} <small>${num(groups[k].length)}</small></h3><ul>${groups[k].slice(0,max[k]).map((it,i)=>{const [a,b]=line(it);return `<li><button type="button" data-k="${k}" data-i="${i}"><span>${a}</span>${b?`<small>${b}</small>`:''}</button></li>`}).join('')}</ul>${groups[k].length>max[k]?`<p class="note">${ar?'وغيرها، أضف كلمة لتضييق البحث.':'And more. Add a word to narrow the search.'}</p>`:''}</section>`).join('');
+   res.querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>act(groups[b.dataset.k][+b.dataset.i]))};
+  inp.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(run,150)});setTimeout(()=>inp.focus(),30)};
+ const add=()=>{const lb=document.getElementById('langBtn');if(!lb||document.querySelector('.sbtn'))return;const b=document.createElement('button');b.type='button';b.className='sbtn';
+  const lab=()=>{const ar=document.documentElement.lang==='ar';b.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;b.setAttribute('aria-label',ar?'البحث في الموقع':'Search the site');b.title=ar?'البحث في الموقع':'Search the site'};
+  b.onclick=open;lb.parentElement.insertBefore(b,lb.previousElementSibling&&lb.previousElementSibling.tagName==='BUTTON'?lb.previousElementSibling:lb);lab();addEventListener('hashchange',lab)};
+ if(document.readyState!=='loading')add();else addEventListener('DOMContentLoaded',add);setTimeout(add,500);
+ addEventListener('keydown',e=>{if(e.key==='/'&&!/input|textarea|select/i.test((document.activeElement||{}).tagName||'')){e.preventDefault();open()}});
+ addEventListener('hashchange',()=>close());
+ window.__siteSearch=open})();
+
+/* "How we research this history": the sources we use, how we check them, and how we handle living people. */
+function renderMethod(){const L=lang==='ar';const T=(en,ar)=>L?ar:en;
+ const S=[
+ [T('The sources we use','المصادر التي نعتمد عليها'),[
+  T('Original documents: deeds, waqf papers, letters, merchant ledgers, ship papers, court records and the official gazette Kuwait Al-Youm. Where we only have a copy printed in a book, the document says so.','الوثائق الأصلية: الحجج والوقفيات والرسائل ودفاتر التجار وأوراق السفن وسجلات المحاكم والجريدة الرسمية «الكويت اليوم». وإذا لم يكن لدينا إلا نسخة منشورة في كتاب، ذكرنا ذلك في الوثيقة.'),
+  T('British archives: files of the British Political Agency and Embassy in Kuwait and of the Foreign Office in London, read through the Arabian Gulf Digital Archive and the Qatar Digital Library.','الأرشيف البريطاني: ملفات الوكالة السياسية والسفارة البريطانية في الكويت ووزارة الخارجية في لندن، من خلال الأرشيف الرقمي للخليج العربي ومكتبة قطر الرقمية.'),
+  T('Books and journals: published histories, studies and magazines that mention the family. They are useful, but they are later accounts, so we say who wrote them.','الكتب والمجلات: كتب التاريخ والدراسات والمجلات المنشورة التي تذكر العائلة. وهي مفيدة، لكنها روايات لاحقة، فنذكر من كتبها.'),
+  T('Press and interviews: newspaper articles, television programmes and filmed interviews, including what family members said about themselves.','الصحافة والمقابلات: مقالات الصحف والبرامج التلفزيونية والمقابلات المصورة، ومنها ما قاله أفراد العائلة عن أنفسهم.'),
+  T('Family knowledge: what the family has always known and passed down. We write it as the family’s account, so it is never mistaken for a written record.','معرفة العائلة: ما تعرفه العائلة وتتناقله. ونكتبه على أنه رواية العائلة، حتى لا يُظن أنه سجل مكتوب.')]],
+ [T('How we decide a record is about our family','كيف نتأكد أن السجل يخص عائلتنا'),[
+  T('A record goes on the site only when its names, places and dates fit our family, and each document says how we know. There are other families named Qatami: nothing from the Rashid bin Qatami or Muhammad bin Qatami lines is included, and records that only share the name, without anything else tying them to us, are kept aside until they can be checked.','لا يُضاف السجل إلا إذا توافقت أسماؤه وأماكنه وتواريخه مع عائلتنا، وتذكر كل وثيقة كيف عرفنا ذلك. وهناك عائلات أخرى باسم القطامي، فلا نضيف شيئا من فرع راشد بن قطامي أو محمد بن قطامي، والسجلات التي تشترك في الاسم فقط دون ما يربطها بنا تبقى جانبا حتى نتحقق منها.'),
+  T('When a record names someone without enough to say which family member it means, we show it without linking it to a person in the tree, and say so.','وإذا ذكر السجل اسما لا يكفي لمعرفة أي فرد من العائلة يقصد، عرضناه دون ربطه بشخص في الشجرة، وذكرنا ذلك.'),
+  T('Social media posts are leads, not proof. We use them to find the underlying document or publication.','ومنشورات وسائل التواصل خيوط للبحث، لا أدلة، نستعين بها للوصول إلى الوثيقة أو المصدر الأصلي.')]],
+ [T('When sources disagree','عندما تختلف المصادر'),[
+  T('We show both accounts and name who says what. For example, Al-Hajji dates the voyage with the yacht Mushrif to 1906 and Al-Wazzan to 1907, and the books differ on who first carried the name Al-Qatami. Words like «first» are quoted from the source that uses them.','نعرض الروايتين ونذكر صاحب كل رواية، فمثلا يؤرخ الحجي رحلة اليخت «مشرف» بسنة ١٩٠٦ والوزان بسنة ١٩٠٧، وتختلف الكتب في أول من حمل اسم القطامي. وكلمات مثل «الأول» ننقلها عن المصدر الذي ذكرها.'),
+  T('Dates are given as the record writes them, Hijri or Gregorian, with the other calendar beside them.','ونكتب التاريخ كما ورد في السجل، هجريا أو ميلاديا، مع ما يقابله في التقويم الآخر.')]],
+ [T('Names and spellings','الأسماء وطريقة كتابتها'),[
+  T('In English we use the spellings the family uses: Al-Qatami, Abdulwahab, Eissa, Jassim, Yousef. Quotations keep the spelling of the original, so British files may say «Jasim Qatami» or «Abdul Wahab». In Arabic we write names as the family writes them.','نستخدم في الإنجليزية الكتابة التي تعتمدها العائلة: Al-Qatami وAbdulwahab وEissa وJassim وYousef، ونبقي الاقتباسات كما وردت، فقد تكتب الملفات البريطانية «Jasim Qatami» أو «Abdul Wahab». وفي العربية نكتب الأسماء كما تكتبها العائلة.')]],
+ [T('How to read a document page','كيف تقرأ صفحة الوثيقة'),[
+  T('Each document shows the page images, cover first, then the pages in order. «Show where Al-Qatami appears» marks the lines that name the family. Each document also gives what the record shows, why it matters, the full citation, and anything still unresolved.','تعرض كل وثيقة صور الصفحات، الغلاف أولا ثم الصفحات بالترتيب، ويظلل زر «أظهر موضع القطامي» الأسطر التي تذكر العائلة. وتذكر كل وثيقة ما يبينه السجل، وأهميته للعائلة، والمرجع كاملا، وما لم يُحسم بعد.'),
+  T('A copy of every source is kept in the family archive.','وتُحفظ نسخة من كل مصدر في أرشيف العائلة.')]],
+ [T('Living family members','أفراد العائلة الأحياء'),[
+  T('For living people the public site shows names only. Dates, photographs, news and other details are seen only by family members who are signed in.','لا يعرض الموقع العام عن الأحياء إلا أسماءهم، أما التواريخ والصور والأخبار وغيرها فلا يراها إلا أفراد العائلة بعد تسجيل الدخول.')]],
+ [T('Corrections','التصحيحات'),[
+  T('Family members can suggest a correction from any person’s profile. Every change is checked before it appears, and the site is backed up every night.','يستطيع أفراد العائلة اقتراح تصحيح من صفحة أي شخص، ويُراجع كل تعديل قبل ظهوره، ويُحفظ الموقع احتياطيا كل ليلة.')]]];
+ main.innerHTML=`<section class="page"><div class="wrap" style="max-width:860px"><h1>${esc(T('How we research this history','كيف نوثق هذا التاريخ'))}</h1>
+  <p class="lede">${esc(T('Every name on this site should lead back to a source. This page explains where our information comes from and how we check it.','كل اسم في هذا الموقع ينبغي أن يقود إلى مصدر، وتشرح هذه الصفحة من أين تأتي معلوماتنا وكيف نتحقق منها.'))}</p>
+  ${S.map(([h,ps])=>`<h2 style="margin-top:30px">${esc(h)}</h2>${ps.map(p=>`<p style="margin:0 0 12px;line-height:1.7">${esc(p)}</p>`).join('')}`).join('')}
+  <p style="margin-top:30px"><a class="btn" href="#documents">${esc(T('Historical Documents','الوثائق التاريخية'))}</a> <a class="btn" href="#history">${esc(T('Family History','تاريخ العائلة'))}</a></p></div></section>`}
+/* a link to this page in the footer and at the top of History and Documents */
+(()=>{const put=()=>{const f=document.querySelector('footer.site');if(f&&!f.querySelector('.mlink')){const a=document.createElement('a');a.className='mlink';a.href='#method';f.appendChild(a)}
+ const ar=document.documentElement.lang==='ar';document.querySelectorAll('.mlink').forEach(a=>{const v=ar?'كيف نوثق هذا التاريخ':'How we research this history';if(a.textContent!==v)a.textContent=v});
+ const lede=main&&main.querySelector('section.page .lede');const r=(location.hash||'').slice(1);
+ if(lede&&/^(history|documents)/.test(r)&&!main.querySelector('.mlink2')){const p=document.createElement('p');p.className='note mlink2';p.innerHTML=`<a href="#method">${ar?'كيف نوثق هذا التاريخ ›':'How we research this history ›'}</a>`;lede.after(p)}};
+ new MutationObserver(()=>put()).observe(document.documentElement,{childList:true,subtree:true})})();
 
 function renderDocs(){main.innerHTML=`<section class="page"><div class="wrap"><h1>${esc(t('docs_h'))}</h1><p class="lede">${esc(t('docs_l'))}</p><p class="note" style="margin-top:6px">${num(DOCS.length)} ${esc(t('docs_count'))}</p><p style="margin-top:10px"><a class="btn" href="#mosque">${esc(lang==='ar'?'مسجد القطامي: كل المصادر':'Masjid Al-Qatami: all the sources')}</a></p>
  <nav class="toc panel" aria-label="${esc(t('docs_toc'))}"><h3>${esc(t('docs_toc'))}</h3><ol>${DOCS.map(d=>`<li><a href="#documents" data-jump="doc-${d.id}"><span class="note">${esc(d.date[lang]||'')}</span> ${esc(d.t[lang]||'')}</a></li>`).join('')}</ol></nav>
