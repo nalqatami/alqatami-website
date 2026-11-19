@@ -370,6 +370,14 @@ footer.site .wrap{padding-block:16px}
 body.treeapp footer.site{display:none}
 
 /* books, documents, charts, viewer */
+article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsum{display:none}article.doc.dcol{display:block;margin-top:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.dsum{display:grid;grid-template-columns:130px minmax(0,1fr);gap:18px;align-items:start}.dsum:not(:has(.dthumb)){grid-template-columns:1fr}
+.dthumb{padding:0;border:0;background:none;cursor:zoom-in;display:block}.dthumb img{width:100%;height:170px;object-fit:cover;object-position:top;border-radius:8px;border:1px solid var(--line);background:var(--sunk);display:block}
+.dwhat{margin:8px 0 10px;color:var(--ink)}.dbtns,.dclose{display:flex;gap:8px;flex-wrap:wrap}.dclose{grid-column:1/-1;margin-bottom:-6px}
+.stack:has(>article.doc){gap:16px!important}
+@media(max-width:640px){.dsum{grid-template-columns:92px minmax(0,1fr);gap:12px}.dthumb img{height:124px}.dsum h2{font-size:1.15rem}.dwhat{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}}
+.totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
+.totop[hidden]{display:none}
 .mqlist{list-style:none;padding:0;margin:20px 0;display:flex;flex-direction:column;gap:14px}.mqi{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}@media(max-width:640px){.mqi{grid-template-columns:1fr}}.mqim img{width:100%;max-height:210px;object-fit:contain;background:var(--sunk);border-radius:6px}
 .dadd{margin:16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dform{margin:16px 0}.dform .dg{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.dform .dg{grid-template-columns:1fr}}.dform label{display:flex;flex-direction:column;gap:4px;font-size:.85rem}.dform input,.dform textarea{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}.dform .padd{width:100%;max-width:420px}.dppl{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.dppl .chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px}.dppl button,.dpb button{border:0;background:none;cursor:pointer;font-size:1rem;color:inherit}.dpr{display:grid;grid-template-columns:70px 1fr 1fr auto;gap:8px;align-items:center;margin:6px 0}@media(max-width:700px){.dpr{grid-template-columns:60px 1fr}}.dpr img{width:70px;height:90px;object-fit:contain;background:var(--sunk);border-radius:4px}.downr{margin-top:12px}
 .doc .scans{display:flex;flex-direction:column;gap:12px}.doc .scans figure{margin:0}.doc .scans figcaption{margin-top:4px;text-align:center}
@@ -1786,7 +1794,7 @@ window.__docOwner=async()=>{try{
  const save=async rec=>{const t0=Date.now();const aid=('dc-'+rec.docId+'-'+t0).replace(/[^A-Za-z0-9_-]/g,'').slice(0,120);Object.assign(rec,{kind:'doc',at:t0,approvedAt:t0});
   await db.doc('approved/'+aid).set(rec);let A=[];try{A=JSON.parse(localStorage.getItem('aq-approved')||'[]')}catch(e){}A.push(Object.assign({id:aid},rec));
   try{localStorage.setItem('aq-approved',JSON.stringify(A.sort((a,c)=>(a.at||0)-(c.at||0))));sessionStorage.setItem('aq-reloaded',localStorage.getItem('aq-approved'))}catch(e){}
-  window.__dj='doc-'+rec.docId;location.reload()};
+  window.__dj='doc-'+rec.docId;try{sessionStorage.setItem('aq-dj','doc-'+rec.docId)}catch(e){}location.reload()};
  const shrink=f=>new Promise(res=>{const im=new Image();const u=URL.createObjectURL(f);im.onload=()=>{const m=2000,s=Math.min(1,m/Math.max(im.naturalWidth,im.naturalHeight));
   const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
   URL.revokeObjectURL(u);c.toBlob(b=>res(b||f),'image/jpeg',.86)};im.onerror=()=>{URL.revokeObjectURL(u);res(f)};im.src=u});
@@ -1837,10 +1845,58 @@ window.__docOwner=async()=>{try{
  main.querySelectorAll('article.doc').forEach(art=>{const id=art.id.replace(/^doc-/,'');const d=DOCS.find(x=>x.id===id);if(!d)return;
   const c=document.createElement('p');c.className='downr';
   c.innerHTML=(d.owner?`<button type="button" class="btn ded">${T('Edit','عدّلي')}</button> `:'')+`<button type="button" class="btn ddel">${T('Remove from site','احذفي من الموقع')}</button>`;
-  art.firstElementChild.appendChild(c);
-  const e=c.querySelector('.ded');if(e)e.addEventListener('click',()=>{if(art.querySelector('.dform'))return;art.firstElementChild.appendChild(form(d,id))});
+  (art.querySelector(':scope>div:not(.dsum):not(.dclose)')||art.firstElementChild).appendChild(c);
+  const e=c.querySelector('.ded');if(e)e.addEventListener('click',()=>{if(art.querySelector('.dform'))return;(art.querySelector(':scope>div:not(.dsum):not(.dclose)')||art.firstElementChild).appendChild(form(d,id))});
   const r=c.querySelector('.ddel');r.addEventListener('click',async()=>{if(!r.dataset.sure){r.dataset.sure=1;r.textContent=T('Press again to remove','اضغطي مرة أخرى للحذف');return}try{await save({docId:id,del:true})}catch(err){r.textContent=T('Could not remove','تعذر الحذف')}})})
 }catch(e){}};
+
+/* Historical Documents: each document shows as a short card (date, title, first page, a few lines).
+   "Read the document" opens it in full. This keeps the page short and quick to scroll,
+   and only the first page of each document is loaded until it is opened.
+   "Save as PDF" opens a clean page with the document's pages and the print window,
+   where the reader can choose Save as PDF. */
+window.__docOpen=el=>{if(!el||!el.classList.contains('dcol'))return;el.classList.remove('dcol');el.classList.add('dopenx')};
+window.__docClose=el=>{if(!el)return;el.classList.add('dcol');el.classList.remove('dopenx');const r=el.getBoundingClientRect();if(r.top<0)el.scrollIntoView({block:'start'})};
+window.__docPDF=id=>{const d=DOCS.find(x=>'doc-'+x.id===id);if(!d)return;const L=lang;const g=o=>(o&&o[L])||(o&&o.en)||'';
+ const pages=(d.scans||[]).map(x=>({f:new URL(x.f,location.href).href,c:L==='ar'&&x.cap_ar?x.cap_ar:(x.cap||'')}));
+ if(!pages.length&&d.img&&typeof IMG!=='undefined'&&IMG[d.img])pages.push({f:new URL(IMG[d.img],location.href).href,c:''});
+ const w=window.open('','_blank');if(!w){alert(L==='ar'?'اسمح للموقع بفتح نافذة جديدة ثم حاول مرة أخرى.':'Please allow this site to open a new window, then try again.');return}
+ const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ w.document.write(`<!doctype html><html lang="${L}" dir="${L==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(g(d.t))}</title>
+ <style>body{font:15px/1.5 Georgia,serif;margin:24px;color:#111;background:#fff}h1{font-size:20px;margin:0 0 6px}p{margin:0 0 6px;color:#444}
+ figure{margin:18px 0;break-inside:avoid;page-break-inside:avoid}figure img{width:100%;height:auto;display:block}figcaption{font-size:12px;color:#555;margin-top:4px}
+ .bar{position:sticky;top:0;background:#fff;padding:8px 0;border-bottom:1px solid #ddd;margin-bottom:10px}.bar button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #888;background:#14273d;color:#fff}
+ @media print{.bar{display:none}body{margin:0}figure{page-break-after:always}figure:last-child{page-break-after:auto}}</style></head><body>
+ <div class="bar"><button onclick="print()">${L==='ar'?'حفظ بصيغة PDF أو طباعة':'Save as PDF or print'}</button></div>
+ <h1>${e(g(d.t))}</h1><p>${e(g(d.date))}</p><p>${e(g(d.src))}</p><p>${L==='ar'?'إرث عائلة القطامي':'Al-Qatami Family Legacy'}</p>
+ ${pages.map(p=>`<figure><img src="${e(p.f)}" alt=""><figcaption>${e(p.c)}</figcaption></figure>`).join('')}
+ <script>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))).then(()=>setTimeout(()=>print(),300))<\/script></body></html>`);w.document.close()};
+window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
+ const nav=main.querySelector('nav.toc');if(nav&&!nav.querySelector('details')){const h=nav.querySelector('h3'),ol=nav.querySelector('ol');if(h&&ol){const dt=document.createElement('details');const sm=document.createElement('summary');sm.innerHTML=`<h3 style="display:inline">${esc(h.textContent)}</h3> <span class="note">(${num(DOCS.length)})</span>`;dt.append(sm,ol);h.replaceWith(dt)}}
+ main.querySelectorAll('article.doc').forEach(a=>{const id=a.id;const d=DOCS.find(x=>'doc-'+x.id===id);if(!d||a.querySelector('.dsum'))return;
+  const g=o=>(o&&o[lang])||'';const first=(d.scans||[])[0];const im=first?first.f:(d.img&&typeof IMG!=='undefined'?IMG[d.img]:'');
+  const what=g(d.what);const n=(d.scans||[]).length;
+  const s=document.createElement('div');s.className='dsum';
+  s.innerHTML=`${im?`<button type="button" class="dthumb" aria-label="${esc(T('Read the document','اقرأ الوثيقة'))}"><img src="${im}" loading="lazy" alt=""></button>`:''}
+   <div style="min-width:0"><div class="eyebrow">${esc(g(d.date))}</div><h2 style="margin:4px 0 6px">${esc(g(d.t))}</h2><p class="note">${esc(g(d.kind))}</p>
+   <p class="dwhat">${esc(what.length>260?what.slice(0,260)+'…':what)}</p>
+   <div class="dbtns"><button type="button" class="btn dread">${esc(T('Read the document','اقرأ الوثيقة'))}${n>1?(L?`، ${num(n)} ${n<=10?'صفحات':'صفحة'}`:` · ${n} pages`):''}</button>
+   <button type="button" class="btn dpdf">${esc(T('Save as PDF','حفظ بصيغة PDF'))}</button></div></div>`;
+  const c=document.createElement('div');c.className='dclose';c.innerHTML=`<button type="button" class="btn">${esc(T('Close this document','أغلق الوثيقة'))}</button><button type="button" class="btn dpdf">${esc(T('Save as PDF','حفظ بصيغة PDF'))}</button>`;
+  a.prepend(c);a.prepend(s);a.classList.add('dcol');
+  s.querySelector('.dread').onclick=()=>window.__docOpen(a);const th=s.querySelector('.dthumb');if(th)th.onclick=()=>window.__docOpen(a);
+  c.querySelector('button').onclick=()=>window.__docClose(a);a.querySelectorAll('.dpdf').forEach(b=>b.onclick=()=>window.__docPDF(id))});try{const j=sessionStorage.getItem('aq-dj');if(j){sessionStorage.removeItem('aq-dj');setTimeout(()=>{const e=document.getElementById(j);if(e){window.__docOpen(e);e.scrollIntoView({block:'start'})}},80)}}catch(e){}};
+
+/* Scrolling: long jumps happen at once instead of a slow glide (a slow glide loads every picture on the way),
+   and a "Back to top" button appears on long pages. */
+(()=>{const orig=Element.prototype.scrollIntoView;
+ Element.prototype.scrollIntoView=function(o){try{if(o&&typeof o==='object'&&o.behavior==='smooth'){const r=this.getBoundingClientRect();if(Math.abs(r.top)>innerHeight*1.5)o=Object.assign({},o,{behavior:'auto'})}}catch(e){}return orig.call(this,o)};
+ const b=document.createElement('button');b.type='button';b.className='totop';b.hidden=true;
+ const lab=()=>{const ar=document.documentElement.lang==='ar';b.textContent=ar?'↑ إلى الأعلى':'↑ Top';b.setAttribute('aria-label',ar?'العودة إلى أعلى الصفحة':'Back to the top of the page')};
+ b.onclick=()=>{window.scrollTo({top:0,behavior:'auto'})};
+ const upd=()=>{b.hidden=!(window.scrollY>innerHeight*2)||document.body.classList.contains('treeapp')};
+ addEventListener('scroll',upd,{passive:true});addEventListener('hashchange',()=>setTimeout(()=>{lab();upd()},50));
+ const add=()=>{document.body.appendChild(b);lab();upd()};if(document.body)add();else addEventListener('DOMContentLoaded',add)})();
 
 function docHTML(d){const L=lang;const g=(o)=>o[L]||'';
  const what=d.id==='alzayed47'?t('doc1_what'):g(d.what),why=d.id==='alzayed47'?t('doc1_why'):g(d.why),status=d.id==='alzayed47'?t('doc1_status'):g(d.status);
@@ -1887,10 +1943,10 @@ function renderMosque(){const L=lang==='ar';const T=(en,ar)=>L?ar:en;const list=
 function renderDocs(){main.innerHTML=`<section class="page"><div class="wrap"><h1>${esc(t('docs_h'))}</h1><p class="lede">${esc(t('docs_l'))}</p><p class="note" style="margin-top:6px">${num(DOCS.length)} ${esc(t('docs_count'))}</p><p style="margin-top:10px"><a class="btn" href="#mosque">${esc(lang==='ar'?'مسجد القطامي: كل المصادر':'Masjid Al-Qatami: all the sources')}</a></p>
  <nav class="toc panel" aria-label="${esc(t('docs_toc'))}"><h3>${esc(t('docs_toc'))}</h3><ol>${DOCS.map(d=>`<li><a href="#documents" data-jump="doc-${d.id}"><span class="note">${esc(d.date[lang]||'')}</span> ${esc(d.t[lang]||'')}</a></li>`).join('')}</ol></nav>
  <div class="stack" style="gap:44px">${DOCS.map(docHTML).join('')}</div></div></section>`;
- bindDocs();if(window.__docOwner)window.__docOwner();if(window.__dj){const j=window.__dj;window.__dj=null;setTimeout(()=>{const e=document.getElementById(j);if(e)e.scrollIntoView({block:'start'})},60)}}
+ bindDocs();if(window.__docOwner)window.__docOwner();if(window.__docCards)window.__docCards();if(window.__dj){const j=window.__dj;window.__dj=null;setTimeout(()=>{const e=document.getElementById(j);if(e){window.__docOpen&&window.__docOpen(e);e.scrollIntoView({block:'start'})}},60)}}
 function bindDocs(){main.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>openViewer(IMG[b.dataset.view])));
  main.querySelectorAll('[data-src]').forEach(b=>b.addEventListener('click',()=>openViewer(b.dataset.src)));
- main.querySelectorAll('[data-jump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.dataset.jump);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}))}
+ main.querySelectorAll('[data-jump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.dataset.jump);if(el){window.__docOpen&&window.__docOpen(el);el.scrollIntoView({block:'start'})}}))}
 function renderCharts(){main.innerHTML=`<section class="page"><div class="wrap"><h1>${esc(t('charts_h'))}</h1><p class="lede">${esc(t('charts_l'))}</p>
  <figure class="chart" style="margin-inline:0"><img src="${IMG.tree}" alt="${esc(t('ch1_t'))}" data-view="tree"><figcaption class="cap"><div><h3>${esc(t('ch1_t'))}</h3><p class="note">${esc(t('ch1_p'))}</p></div><button class="btn" type="button" data-view="tree">${esc(t('open_view'))}</button></figcaption></figure>
  ${[['covers/alzayed-p47.jpg',47,'Al-Zayed lineage chart: Ghanim and his sons Abdulaziz (the Al-Qatami founder), Eissa and Mohammed','مشجرة آل زايد: غانم وأبناؤه عبدالعزيز (مؤسس القطامي) وعيسى ومحمد'],['covers/alzayed-p48.jpg',48,'Al-Qatami lineage chart: Abdulaziz, his son Abdulwahab, and their descendants','مشجرة القطامي: عبدالعزيز وابنه عبدالوهاب وذريتهما'],['covers/alzayed-p55.jpg',55,'Al-Ghanim lineage chart: Khalifa bin Shaheen and his sons','مشجرة الغانم: خليفة بن شاهين وأبناؤه']].map(([f,pg,en,ar])=>`<figure class="chart" style="margin-inline:0"><img src="${f}" alt="${esc(lang==='ar'?ar:en)}" data-pv="${f}" loading="lazy"><figcaption class="cap"><div><h3>${esc(lang==='ar'?ar:en)}</h3><p class="note">${lang==='ar'?`من كتاب «آل زايد: تاريخ ورجال» ليوسف محمد صقر الجاسر الغانم، الكويت، سبتمبر ٢٠٠٦، صفحة ${num(pg)}.`:`From the book Al Zayed: History and Men by Yousef Mohammed Saqr Al-Jasser Al-Ghanim, Kuwait, September 2006, page ${pg}.`}</p></div><button class="btn" type="button" data-pv="${f}">${esc(t('open_view'))}</button></figcaption></figure>`).join('')}</div></section>`;main.querySelectorAll('[data-pv]').forEach(b=>b.addEventListener('click',()=>openViewer(b.dataset.pv)));
