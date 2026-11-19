@@ -378,6 +378,10 @@ article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsu
 @media(max-width:640px){.dsum{grid-template-columns:92px minmax(0,1fr);gap:12px}.dthumb img{height:124px}.dsum h2{font-size:1.15rem}.dwhat{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}}
 .totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
 .totop[hidden]{display:none}
+.tmore{display:none}
+@media(max-width:700px){.tmore{display:inline-flex}.tbar label.chk{display:none}.tbar.topen label.chk{display:inline-flex}
+ .prof.min .pbody>*:not(.navbtns){display:none!important}.prof.min .ph .tag+.tag{display:none}
+ .findme{flex-wrap:nowrap;padding:6px 12px;gap:8px}.findme span{min-width:0;font-size:.8rem;line-height:1.3}.findme .fm-go{padding:4px 10px;font-size:.8rem;white-space:nowrap}}
 .mqlist{list-style:none;padding:0;margin:20px 0;display:flex;flex-direction:column;gap:14px}.mqi{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}@media(max-width:640px){.mqi{grid-template-columns:1fr}}.mqim img{width:100%;max-height:210px;object-fit:contain;background:var(--sunk);border-radius:6px}
 .dadd{margin:16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.dform{margin:16px 0}.dform .dg{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.dform .dg{grid-template-columns:1fr}}.dform label{display:flex;flex-direction:column;gap:4px;font-size:.85rem}.dform input,.dform textarea{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}.dform .padd{width:100%;max-width:420px}.dppl{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.dppl .chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px}.dppl button,.dpb button{border:0;background:none;cursor:pointer;font-size:1rem;color:inherit}.dpr{display:grid;grid-template-columns:70px 1fr 1fr auto;gap:8px;align-items:center;margin:6px 0}@media(max-width:700px){.dpr{grid-template-columns:60px 1fr}}.dpr img{width:70px;height:90px;object-fit:contain;background:var(--sunk);border-radius:4px}.downr{margin-top:12px}
 .doc .scans{display:flex;flex-direction:column;gap:12px}.doc .scans figure{margin:0}.doc .scans figcaption{margin-top:4px;text-align:center}
@@ -1897,6 +1901,14 @@ window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
  const upd=()=>{b.hidden=!(window.scrollY>innerHeight*2)||document.body.classList.contains('treeapp')};
  addEventListener('scroll',upd,{passive:true});addEventListener('hashchange',()=>setTimeout(()=>{lab();upd()},50));
  const add=()=>{document.body.appendChild(b);lab();upd()};if(document.body)add();else addEventListener('DOMContentLoaded',add)})();
+/* Family tree on phones: more room for the tree. The view options fold behind "Options",
+   and the person panel at the bottom starts small. */
+(()=>{const fix=()=>{const tb=document.querySelector('.tbar');if(!tb||tb.querySelector('.tmore'))return;const ar=document.documentElement.lang==='ar';
+ const b=document.createElement('button');b.type='button';b.className='btn tmore';b.textContent=ar?'خيارات':'Options';b.setAttribute('aria-expanded','false');
+ b.onclick=()=>{const o=tb.classList.toggle('topen');b.setAttribute('aria-expanded',o?'true':'false')};
+ const f=tb.querySelector('#tMe')||tb.querySelector('#tFounder');if(f)f.after(b);else tb.appendChild(b)};
+ const run=()=>setTimeout(fix,60);addEventListener('hashchange',run);if(document.readyState!=='loading')run();else addEventListener('DOMContentLoaded',run);
+ new MutationObserver(()=>{if(document.querySelector('.tbar')&&!document.querySelector('.tmore'))fix()}).observe(document.documentElement,{childList:true,subtree:true})})();
 
 function docHTML(d){const L=lang;const g=(o)=>o[L]||'';
  const what=d.id==='alzayed47'?t('doc1_what'):g(d.what),why=d.id==='alzayed47'?t('doc1_why'):g(d.why),status=d.id==='alzayed47'?t('doc1_status'):g(d.status);
