@@ -379,6 +379,7 @@ article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsu
 .totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
 .totop[hidden]{display:none}
 .tmore{display:none}
+.dsearch{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 6px}.dsearch input{flex:1;min-width:220px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
 @media(max-width:700px){.tmore{display:inline-flex}.tbar label.chk{display:none}.tbar.topen label.chk{display:inline-flex}
  .prof.min .pbody>*:not(.navbtns){display:none!important}.prof.min .ph .tag+.tag{display:none}
  .findme{flex-wrap:nowrap;padding:6px 12px;gap:8px}.findme span{min-width:0;font-size:.8rem;line-height:1.3}.findme .fm-go{padding:4px 10px;font-size:.8rem;white-space:nowrap}}
@@ -1877,6 +1878,17 @@ window.__docPDF=id=>{const d=DOCS.find(x=>'doc-'+x.id===id);if(!d)return;const L
  <script>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r}))).then(()=>setTimeout(()=>print(),300))<\/script></body></html>`);w.document.close()};
 window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
  const nav=main.querySelector('nav.toc');if(nav&&!nav.querySelector('details')){const h=nav.querySelector('h3'),ol=nav.querySelector('ol');if(h&&ol){const dt=document.createElement('details');const sm=document.createElement('summary');sm.innerHTML=`<h3 style="display:inline">${esc(h.textContent)}</h3> <span class="note">(${num(DOCS.length)})</span>`;dt.append(sm,ol);h.replaceWith(dt)}}
+
+ /* search box: filter the cards by any word in the title, summary, citation or names */
+ const st=main.querySelector('.stack');if(st&&!main.querySelector('.dsearch')){const box=document.createElement('div');box.className='dsearch';
+  box.innerHTML=`<input type="search" placeholder="${esc(T('Search the documents: a name, a place, a year','ابحث في الوثائق: اسم أو مكان أو سنة'))}" aria-label="${esc(T('Search the documents','ابحث في الوثائق'))}"><span class="note dcount"></span>`;
+  st.before(box);const inp=box.querySelector('input'),cnt=box.querySelector('.dcount');
+  const norm=x=>String(x||'').toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');
+  const idx=new Map();DOCS.forEach(d=>{const o=v=>v?(v.en||'')+' '+(v.ar||''):'';const names=(d.people||[]).map(x=>P[x]?(P[x].n||'')+' '+(AR_N[x]||''):'').join(' ');
+   idx.set('doc-'+d.id,norm([o(d.t),o(d.what),o(d.why),o(d.kind),o(d.date),o(d.src),names,(d.others&&((d.others.en||[]).join(' ')+' '+(d.others.ar||[]).join(' ')))||'',(d.scans||[]).map(x=>(x.cap||'')+' '+(x.cap_ar||'')).join(' ')].join(' ')))});
+  let tm;inp.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(()=>{const words=norm(inp.value).split(/\s+/).filter(Boolean);let n=0;
+   main.querySelectorAll('article.doc').forEach(a=>{const tx=idx.get(a.id)||'';const show=!words.length||words.every(w=>tx.includes(w));a.style.display=show?'':'none';if(show)n++});
+   cnt.textContent=words.length?(L?`${num(n)} من ${num(DOCS.length)}`:`${n} of ${DOCS.length}`):''},150)})}
  main.querySelectorAll('article.doc').forEach(a=>{const id=a.id;const d=DOCS.find(x=>'doc-'+x.id===id);if(!d||a.querySelector('.dsum'))return;
   const g=o=>(o&&o[lang])||'';const first=(d.scans||[])[0];const im=first?first.f:(d.img&&typeof IMG!=='undefined'?IMG[d.img]:'');
   const what=g(d.what);const n=(d.scans||[]).length;
