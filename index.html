@@ -380,6 +380,7 @@ article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsu
 .totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
 .totop[hidden]{display:none}
 .tmore{display:none}
+.dacts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;grid-column:1/-1}.dacts .btn{padding:6px 12px;font-size:.88rem}article.doc.dcol .dacts{display:none}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .drec{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:10px 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;grid-column:1/-1;font-size:.9rem}.drec div{min-width:0}.drec dt{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.drec dd{margin:2px 0 0}article.doc.dcol .drec{display:none}@media(max-width:640px){.drec{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.ticker{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;-webkit-mask-image:none;mask-image:none;padding-inline:16px}.tkt .tkp{scroll-snap-align:start}}
@@ -1965,6 +1966,13 @@ window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
   rec.innerHTML=row(T('Date','التاريخ'),g(d.date))+row(T('Record','نوع السجل'),g(d.kind))+row(T('Source and reference','المصدر والمرجع'),g(d.src))+row(T('Images','الصور'),n?`${imgKind} (${L?num(n)+' '+(n<=10?'صور':'صورة'):n+(n>1?' images':' image')})`:'');
   if(window.__PUBLIC){const u='documents/'+encodeURIComponent(d.id)+'.html';rec.insertAdjacentHTML('beforeend',`<div><dt>${esc(T('Permanent link','رابط ثابت'))}</dt><dd><a href="${u}" dir="ltr">${esc(location.origin+'/'+u)}</a></dd></div>`)}
   a.prepend(c);a.prepend(s);a.classList.add('dcol');{const td=[...a.children].find(e=>e.tagName==='DIV'&&!e.classList.contains('dsum')&&!e.classList.contains('dclose')&&!e.classList.contains('scans'));const h=td&&td.querySelector(':scope>h2');if(h&&h.nextElementSibling)h.nextElementSibling.after(rec);else if(td)td.prepend(rec);else c.after(rec)}
+  {const hs=[...a.querySelectorAll('h3')];const find=k=>{let x='';try{x=t(k)}catch(e){}return hs.find(h=>h.textContent.trim()===x)};
+   const hT=find('doc_tr')||find('doc_trn_x');const hasT=hT&&hT.nextElementSibling&&hT.nextElementSibling.textContent.trim()&&!/^undefined$/.test(hT.nextElementSibling.textContent.trim());
+   const hP=find('people_link');const sc=a.querySelector('.scans,button.scan');
+   const acts=[[sc,T('View the pages','اعرض الصفحات')],[hasT?hT:null,T('Read the text','اقرأ النص')],[hP,T('People named','الأشخاص المذكورون')]].filter(x=>x[0]);
+   if(acts.length>1){const nav=document.createElement('nav');nav.className='dacts';nav.setAttribute('aria-label',T('In this document','في هذه الوثيقة'));
+    acts.forEach(([tg,lab])=>{const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=lab;b.onclick=()=>{tg.scrollIntoView({block:'start'});if(tg.tagName==='H3'){tg.setAttribute('tabindex','-1');tg.focus({preventScroll:true})}};nav.appendChild(b)});rec.after(nav)}}
+
   s.querySelector('.dread').onclick=()=>window.__docOpen(a);const th=s.querySelector('.dthumb');if(th)th.onclick=()=>window.__docOpen(a);
   c.querySelector('button').onclick=()=>window.__docClose(a);a.querySelectorAll('.dpdf').forEach(b=>b.onclick=()=>window.__docPDF(id))});try{const j=sessionStorage.getItem('aq-dj');if(j){setTimeout(()=>{const e=document.getElementById(j);if(e){try{sessionStorage.removeItem('aq-dj')}catch(x){}window.__docOpen(e);e.scrollIntoView({block:'start'})}},80)}}catch(e){}};
 
@@ -2198,7 +2206,7 @@ function openViewer(src){const v=document.createElement('div');v.className='view
 const W=138,H=70,SG=26,HG=14,RH=136;
 const Tree=(()=>{
  let el=null,state=null;
- const st={view:store.get('aq-view')||'desc',sel:ROOT,focus:ROOT,expanded:new Set(),collapsed:new Set(),pedOpen:new Set(),famExp:new Set(),famCol:new Set(),z:0.9,tx:0,ty:0,arcs:store.get('aq-arcs2')==='1',me:store.get('aq-me')||null,min:true,scope:store.get('aq-scope')||'all'};
+ const st={view:store.get('aq-view')||'desc',sel:ROOT,focus:ROOT,expanded:new Set(),collapsed:new Set((()=>{try{if(sessionStorage.getItem('aq-tree-opened'))return [];sessionStorage.setItem('aq-tree-opened','1')}catch(e){}const o=[];for(const k in F){if(F[k].h==='I342624648668')o.push(...(F[k].c||[]))}return o})()),pedOpen:new Set(),famExp:new Set(),famCol:new Set(),z:0.9,tx:0,ty:0,arcs:store.get('aq-arcs2')==='1',me:store.get('aq-me')||null,min:true,scope:store.get('aq-scope')||'all'};
  if(!['all','qi','q'].includes(st.scope))st.scope='all';
  const isQ=x=>!!(P[x]&&/^q/.test(P[x].c));
  const pedOk=(x,p,k)=>st.scope==='all'||(st.scope==='q'?isQ(p):(isQ(x)||k===0));
