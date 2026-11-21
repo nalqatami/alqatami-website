@@ -1461,7 +1461,7 @@ function renderHome(){const gens=new Set(ids.map(x=>P[x].g).filter(g=>g>0)).size
  ${anc.length>4?`<div class="ticker" aria-label="${L?'من أجدادنا':'Our ancestors'}"><div class="tkt">${tk}${tk.replace(/<a /g,'<a tabindex="-1" aria-hidden="true" ')}</div></div>`:''}
  <div class="persp"><div class="eyebrow ln"><span>${L?'العائلة بالأرقام':'The family in numbers'}</span></div>
   <div class="ph2"><h2 class="big2">${L?'أسماء كثيرة.<br><span>بيت واحد.</span>':'Many names.<br><span>One house.</span>'}</h2><p>${L?'كل رقم هنا يقابله اسم ووثيقة وصورة جمعها أفراد العائلة جيلا بعد جيل.':'Behind every number here is a name, a document or a photograph, gathered by the family generation after generation.'}</p></div>
-  <div class="sgrid stats">${st.map(x=>`<div class="sc"><b class="${x[3]}">${x[0]}</b><strong>${x[1]}</strong><small>${x[2]}</small></div>`).join('')}</div><p class="note" style="margin-top:14px;max-width:72ch">${L?'آخر تحديث: ١٩ نوفمبر ٢٠٢٦. يشمل عدد الأفراد كل من في الشجرة، من آل القطامي ومن تزوج منهم. وتشمل الوثائق التاريخية كل ما في صفحة الوثائق: الوثائق الأصلية والأرشيف البريطاني وصفحات الكتب والمجلات. ويحسب الموقع هذه الأرقام من بياناته مباشرة، فتتطابق في كل صفحاته.':'Last updated 19 November 2026. People counts everyone in the tree, Al-Qatami and those who married into the family. Historical documents counts every record on the Historical Documents page: original documents, British archives, and pages from books and journals. The site counts these from its own records, so the numbers match on every page.'}</p></div>`})()}
+  <div class="sgrid stats">${st.map(x=>`<div class="sc"><b class="${x[3]}">${x[0]}</b><strong>${x[1]}</strong><small>${x[2]}</small></div>`).join('')}</div><p class="note" style="margin-top:14px;max-width:72ch">${L?'آخر تحديث: ٢١ نوفمبر ٢٠٢٦. يشمل عدد الأفراد كل من في الشجرة، من آل القطامي ومن تزوج منهم. وتشمل الوثائق التاريخية كل ما في صفحة الوثائق: الوثائق الأصلية والأرشيف البريطاني وصفحات الكتب والمجلات. ويحسب الموقع هذه الأرقام من بياناته مباشرة، فتتطابق في كل صفحاته.':'Last updated 21 November 2026. People counts everyone in the tree, Al-Qatami and those who married into the family. Historical documents counts every record on the Historical Documents page: original documents, British archives, and pages from books and journals. The site counts these from its own records, so the numbers match on every page.'}</p></div>`})()}
   <div class="home-grid">
    <div class="stack" style="gap:28px">
     <div class="stack"><div class="eyebrow">${esc(t('explore'))}</div><div class="paths">
@@ -1539,12 +1539,28 @@ function renderHistory(){setTimeout(()=>{if(window.__hj){const e=document.getEle
  // keep the reader's name with their id so the owner sees who sent a request
  me().then(m=>{if(m)doc('profiles/'+m.id).set({name:m.email}).catch(()=>{})});
  // sign in / sign out link in the footer
- const signIn=async()=>{const L=document.documentElement.lang==='ar';const e=prompt(L?'اكتب بريدك الإلكتروني وسنرسل لك رابط الدخول':'Type your email and we will send you a sign in link');if(!e)return;try{sessionStorage.setItem('aq-back',location.hash||'')}catch(x){}
-  const r=await fetch(U+'/auth/v1/otp',{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:e.trim(),create_user:true,options:{email_redirect_to:location.origin+location.pathname}})});
-  alert(r.ok?(L?'تم إرسال الرابط إلى بريدك':'Check your email for the sign in link'):(L?'تعذر الإرسال، حاول مرة أخرى':'Could not send the link, please try again'))};
+ const signIn=()=>{const L=document.documentElement.lang==='ar';if(document.querySelector('.aq-si'))return;
+  const d=document.createElement('div');d.className='aq-si';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-labelledby','aqsih');d.dir=L?'rtl':'ltr';
+  d.style.cssText='position:fixed;inset:0;z-index:3000;background:rgba(10,16,24,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  d.innerHTML=`<form style="box-sizing:border-box;background:var(--bg,#fff);color:var(--ink,#1d2433);border-radius:16px;padding:22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+   <h2 id="aqsih" style="margin:0 0 8px">${L?'دخول العائلة':'Family sign in'}</h2>
+   <p class="note" style="margin:0 0 14px">${L?'هذا الدخول لأفراد العائلة الذين أُضيفت عناوين بريدهم. اكتب بريدك وسنرسل لك رابطا للدخول، بدون كلمة مرور.':'This sign in is for family members whose email has been added. Type your email and we will send you a link to sign in, with no password.'}</p>
+   <label style="display:block;margin-bottom:12px">${L?'البريد الإلكتروني':'Email'}<input type="email" required autocomplete="email" style="display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit" dir="ltr"></label>
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn primary">${L?'أرسل الرابط':'Send the link'}</button><button type="button" class="btn aq-x">${L?'إلغاء':'Cancel'}</button></div>
+   <p class="note aq-msg" aria-live="polite" style="margin:12px 0 0"></p></form>`;
+  document.body.appendChild(d);const f=d.querySelector('form'),inp=d.querySelector('input'),msg=d.querySelector('.aq-msg'),close=()=>d.remove();
+  d.querySelector('.aq-x').onclick=close;d.addEventListener('click',e=>{if(e.target===d)close()});d.addEventListener('keydown',e=>{if(e.key==='Escape')close()});setTimeout(()=>inp.focus(),30);
+  f.onsubmit=async ev=>{ev.preventDefault();const e=inp.value.trim();if(!e)return;const bt=f.querySelector('[type=submit]');bt.disabled=true;msg.textContent=L?'جار الإرسال…':'Sending…';
+   try{sessionStorage.setItem('aq-back',location.hash||'')}catch(x){}
+   try{const r=await fetch(U+'/auth/v1/otp',{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:e,create_user:false,options:{email_redirect_to:location.origin+location.pathname}})});
+    if(r.ok){msg.textContent=L?'أرسلنا رابط الدخول إلى بريدك. افتحه من هذا الجهاز.':'We have sent a sign in link to your email. Open it on this device.';bt.hidden=true}
+    else if(r.status===422||r.status===400||r.status===403){msg.textContent=L?'هذا البريد غير مضاف إلى قائمة العائلة بعد. اطلب من نور فيصل القطامي إضافته.':'This email is not on the family list yet. Ask Noor Faisal Al-Qatami to add it.';bt.disabled=false}
+    else if(r.status===429){msg.textContent=L?'طلبات كثيرة في وقت قصير. انتظر دقيقة ثم حاول مرة أخرى.':'Too many requests in a short time. Wait a minute and try again.';bt.disabled=false}
+    else{msg.textContent=L?'تعذر الإرسال الآن. حاول مرة أخرى لاحقا.':'The link could not be sent right now. Please try again later.';bt.disabled=false}}
+   catch(x){msg.textContent=L?'تعذر الاتصال. تحقق من الإنترنت وحاول مرة أخرى.':'Could not connect. Check your internet connection and try again.';bt.disabled=false}}};
  const paint=async()=>{const f=document.querySelector('footer.site .wrap');if(!f)return;let a=f.querySelector('.aq-auth');if(!a){a=document.createElement('a');a.className='aq-auth';a.href='#';a.style.marginInlineStart='12px';f.appendChild(a)}
   const m=await me();const L=document.documentElement.lang==='ar';a.textContent=m?(L?'تسجيل الخروج ('+m.email+')':'Sign out ('+m.email+')'):(L?'دخول العائلة':'Family sign in');
-  a.onclick=ev=>{ev.preventDefault();if(m){S=null;save();location.reload()}else signIn()}};
+  a.setAttribute('role','button');a.onclick=ev=>{ev.preventDefault();if(m){S=null;save();location.reload()}else signIn()}};
  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',paint):setTimeout(paint,0);
 })();
 
