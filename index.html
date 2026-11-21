@@ -380,6 +380,7 @@ article.doc.dcol>*:not(.dsum){display:none!important}article.doc:not(.dcol)>.dsu
 .totop{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;z-index:60;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--navy);color:#fff;font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.18);cursor:pointer}
 .totop[hidden]{display:none}
 .tmore{display:none}
+.factsrc{font-size:.85rem;white-space:nowrap;margin-inline-start:6px}
 .dacts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;grid-column:1/-1}.dacts .btn{padding:6px 12px;font-size:.88rem}article.doc.dcol .dacts{display:none}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .drec{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:10px 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;grid-column:1/-1;font-size:.9rem}.drec div{min-width:0}.drec dt{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.drec dd{margin:2px 0 0}article.doc.dcol .drec{display:none}@media(max-width:640px){.drec{grid-template-columns:minmax(0,1fr)}}
@@ -2023,6 +2024,18 @@ window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
   return ''};
  const fix=()=>{document.querySelectorAll('img').forEach(img=>{if((img.getAttribute('alt')||'').trim()||img.dataset.altdone)return;if(img.closest('.ini,.sbtn,.brand,.linkp,.prow,a[href^="#person-"]')){img.setAttribute('role','presentation');return}const t=label(img);if(t){img.setAttribute('alt',t);img.dataset.altdone='1'}})};
  let tm;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(fix,250)}).observe(document.documentElement,{childList:true,subtree:true});fix()})();
+/* Profiles: a fact that names its source gets a link to the matching record on the Historical Documents page. */
+(()=>{const nrm=x=>String(x||'').toLowerCase().replace(/[ً-ْـ’'`]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/hijji/g,'hajji');
+ const stop=new Set(['al','the','of','and','page','pages','p','pp','in','an','a','fil','wa','min','kuwait','الكويت','ص','في','من','و','interview','noor','faisal','qatami','القطامي','family','confirmed','by','with','center','centre','research','studies','catalogue','selected','edition','issue','volume']);
+ const words=t=>nrm(t).split(/[^a-zء-ي0-9]+/).filter(w=>w.length>3&&!stop.has(w));
+ const run=()=>{const pr=document.querySelector('.prof');if(!pr||typeof DOCS==='undefined')return;const pid=(pr.querySelector('[data-me]')||{}).dataset;const id=pid&&pid.me;if(!id)return;
+  const mine=DOCS.filter(d=>(d.people||[]).includes(id));if(!mine.length)return;const ar=document.documentElement.lang==='ar';
+  pr.querySelectorAll('dl.facts dd').forEach(dd=>{if(dd.dataset.src)return;dd.dataset.src='1';const m=dd.textContent.match(/\(([^()]{8,})\)\s*[^()]*$/);if(!m)return;const ws=words(m[1]);if(ws.length<2)return;
+   const per=['jarida','qabas','anba','alrai','bayan','watan','siyasa','risala','risalat','batha','tali','arabi','magazine','thesis'];const GN=new Set(['mohammed','ahmed','abdullah','abdulaziz','yousef','khalid','ibrahim','prof','ghanem','abdulmohsen']);
+   const key=ws.find(w=>!GN.has(w)&&!/^\d+$/.test(w));const need=Math.max(2,Math.min(3,ws.filter(w=>!/^\d+$/.test(w)).length));let best=null,bs=0;
+   mine.forEach(d=>{const tx=nrm([d.src&&d.src.en,d.src&&d.src.ar,d.kind&&d.kind.en,d.kind&&d.kind.ar,d.t&&d.t.en].join(' '));if(key&&!tx.includes(key))return;if(per.some(w=>ws.includes(w)&&!tx.includes(w)))return;const sc=ws.filter(w=>tx.includes(w)).length;if(sc>bs){bs=sc;best=d}});
+   if(best&&bs>=need){const a=document.createElement('a');a.href='#documents';a.className='factsrc';a.dataset.doc=best.id;a.dataset.sc=bs;a.textContent=ar?' ‹ افتح السجل':' Open the record ›';a.onclick=e=>{e.preventDefault();window.__dj='doc-'+best.id;window.__dcat='all';try{sessionStorage.setItem('aq-dj','doc-'+best.id)}catch(x){}location.hash='documents'};dd.appendChild(a)}})};
+ let tm;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(run,300)}).observe(document.documentElement,{childList:true,subtree:true})})();
 
 function docHTML(d){const L=lang;const g=(o)=>o[L]||'';
  const what=d.id==='alzayed47'?t('doc1_what'):g(d.what),why=d.id==='alzayed47'?t('doc1_why'):g(d.why),status=d.id==='alzayed47'?t('doc1_status'):g(d.status);
@@ -2092,7 +2105,7 @@ function renderMosque(){const L=lang==='ar';const T=(en,ar)=>L?ar:en;const list=
   box.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
   const g=v=>v?(v[lang]||v.en||''):'';
   const label={p:ar?'الأفراد':'People',d:ar?'الوثائق':'Documents',bp:ar?'صفحات الكتب':'Book pages',h:ar?'تاريخ العائلة':'Family History',n:ar?'الصحافة':'Press',b:ar?'الكتب':'Books',z:ar?'الأعمال':'Businesses'};
-  const line=it=>{if(it.k==='p'){const p=P[it.id];const y=typeof years==='function'?years(it.id):'';return [esc(ar&&AR_N[it.id]?AR_N[it.id]:p.n),y?esc(y):'']}
+  const line=it=>{if(it.k==='p'){const p=P[it.id];const y=typeof years==='function'?years(it.id):'';const nd=(DOCS||[]).filter(d=>(d.people||[]).includes(it.id)).length;const ex=[y,nd?(ar?num(nd)+(nd<=10?' وثائق':' وثيقة'):nd+(nd>1?' records':' record')):''].filter(Boolean).join(' · ');return [esc(ar&&AR_N[it.id]?AR_N[it.id]:p.n),esc(ex)]}
    if(it.k==='d'){const d=DOCS.find(x=>x.id===it.id);return [esc(g(d.t)),esc(g(d.date))]}
    if(it.k==='bp'){const d=BOOK_PAGES.find(x=>x.id===it.id);return [esc(g(d.t)),esc(g(d.date))]}
    if(it.k==='h'){const h=HIST.find(x=>x.id===it.id);return [esc(g(h.t)),esc(g(h.when))]}
@@ -2106,7 +2119,7 @@ function renderMosque(){const L=lang==='ar';const T=(en,ar)=>L?ar:en;const list=
   let tm;const run=()=>{const words=norm(inp.value).split(/\s+/).filter(w=>w.length>1||/\d/.test(w));if(!words.length){res.innerHTML=`<p class="note">${ar?'اكتب كلمة واحدة على الأقل.':'Type at least one word.'}</p>`;return}
    const hits=IDX.filter(it=>words.every(w=>it.tx.includes(w)));const sc=it=>it.k!=='p'?0:((/^q/.test(P[it.id].c||'')?0:2)+(it.tx.startsWith(words[0])?0:1));hits.sort((a,b)=>a.k===b.k&&a.k==='p'?sc(a)-sc(b):0);const groups={};hits.forEach(h=>{(groups[h.k]=groups[h.k]||[]).push(h)});
    const order=['p','d','h','bp','n','b','z'];const max={p:12,d:10,h:6,bp:6,n:8,b:6,z:4};
-   if(!hits.length){res.innerHTML=`<p class="note">${ar?'لا توجد نتائج.':'Nothing found.'}</p>`;return}
+   if(!hits.length){res.innerHTML=`<p class="note">${ar?'لا توجد نتائج. جرب كلمة أقصر، أو الاسم الأول وحده، أو اكتبه بالعربية أو الإنجليزية.':'Nothing found. Try a shorter word, a first name on its own, or the name in Arabic or English.'}</p>`;return}
    res.innerHTML=order.filter(k=>groups[k]).map(k=>`<section><h3>${label[k]} <small>${num(groups[k].length)}</small></h3><ul>${groups[k].slice(0,max[k]).map((it,i)=>{const [a,b]=line(it);return `<li><button type="button" data-k="${k}" data-i="${i}"><span>${a}</span>${b?`<small>${b}</small>`:''}</button></li>`}).join('')}</ul>${groups[k].length>max[k]?`<p class="note">${ar?'وغيرها، أضف كلمة لتضييق البحث.':'And more. Add a word to narrow the search.'}</p>`:''}</section>`).join('');
    res.querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>act(groups[b.dataset.k][+b.dataset.i]))};
   inp.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(run,150)});setTimeout(()=>inp.focus(),30)};
