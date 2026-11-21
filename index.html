@@ -1269,6 +1269,11 @@ if(P['I342624816104'])P['I342624816104'].e=(P['I342624816104'].e||[]).concat([['
  if(F['F25']){const want=['I_EISSA_YOUSEF_1','I_EISSA_YOUSEF_2','I342624780944','I_FUDHA_YOUSEF_1','I342624780992','I342624781011','I342624781031','I342624781039','I342624781064','I342624781097','I342624781116','I342624781134'];const rest=F['F25'].c.filter(x=>!want.includes(x));F['F25'].c=want.filter(x=>P[x]).concat(rest)}
  const fu=P['I342624780992'];if(fu)fu.e=(fu.e||[]).concat([['Note','','']]);
  const sh=P['I342624780944'];if(sh){sh.dec=1;sh.e=(sh.e||[]).concat([['Died','Buried 17 August 2024 (Al-Jarida, 18 August 2024)','Kuwait']])}})();
+(()=>{const fu='I342624780992';if(!P[fu]||F['F_FUDHA_HAMAD'])return;
+ const h='I_ABDULLATIF_ALHAMAD',kids=[['I_RASHA_ABDULLATIF_ALHAMAD','Rasha Abdullatif Al-Hamad','F','of','رشا عبداللطيف الحمد'],['I_NOOR_ABDULLATIF_ALHAMAD','Noor Abdullatif Al-Hamad','M','om','نور عبداللطيف الحمد'],['I_FAISAL_ABDULLATIF_ALHAMAD','Faisal Abdullatif Al-Hamad','M','om','فيصل عبداللطيف الحمد']];
+ P[h]={n:'Abdullatif Al-Hamad',s:'M',c:'om',g:5,pc:[],ps:['F_FUDHA_HAMAD'],e:[]};AR_N[h]='عبداللطيف الحمد';
+ kids.forEach(([id,n,s,c,ar])=>{P[id]={n,s,c,g:6,pc:['F_FUDHA_HAMAD'],ps:[],e:[]};AR_N[id]=ar});
+ F['F_FUDHA_HAMAD']={h,w:fu,c:kids.map(k=>k[0]),st:'mar'};P[fu].ps=(P[fu].ps||[]).concat(['F_FUDHA_HAMAD'])})();
 function setNames(){for(const id in P){const p=P[id];if(p.en===undefined)p.en=p.n;p.n=(lang==='ar'&&AR_N[id])?AR_N[id]:p.en}}
 const $=(s,r=document)=>r.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
