@@ -1963,6 +1963,7 @@ window.__docCards=()=>{const L=lang==='ar';const T=(en,ar)=>L?ar:en;
   const rec=document.createElement('dl');rec.className='drec';
   const row=(k,v)=>v?`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`:'';
   rec.innerHTML=row(T('Date','التاريخ'),g(d.date))+row(T('Record','نوع السجل'),g(d.kind))+row(T('Source and reference','المصدر والمرجع'),g(d.src))+row(T('Images','الصور'),n?`${imgKind} (${L?num(n)+' '+(n<=10?'صور':'صورة'):n+(n>1?' images':' image')})`:'');
+  if(window.__PUBLIC){const u='documents/'+encodeURIComponent(d.id)+'.html';rec.insertAdjacentHTML('beforeend',`<div><dt>${esc(T('Permanent link','رابط ثابت'))}</dt><dd><a href="${u}" dir="ltr">${esc(location.origin+'/'+u)}</a></dd></div>`)}
   a.prepend(c);a.prepend(s);a.classList.add('dcol');{const td=[...a.children].find(e=>e.tagName==='DIV'&&!e.classList.contains('dsum')&&!e.classList.contains('dclose')&&!e.classList.contains('scans'));const h=td&&td.querySelector(':scope>h2');if(h&&h.nextElementSibling)h.nextElementSibling.after(rec);else if(td)td.prepend(rec);else c.after(rec)}
   s.querySelector('.dread').onclick=()=>window.__docOpen(a);const th=s.querySelector('.dthumb');if(th)th.onclick=()=>window.__docOpen(a);
   c.querySelector('button').onclick=()=>window.__docClose(a);a.querySelectorAll('.dpdf').forEach(b=>b.onclick=()=>window.__docPDF(id))});try{const j=sessionStorage.getItem('aq-dj');if(j){setTimeout(()=>{const e=document.getElementById(j);if(e){try{sessionStorage.removeItem('aq-dj')}catch(x){}window.__docOpen(e);e.scrollIntoView({block:'start'})}},80)}}catch(e){}};
